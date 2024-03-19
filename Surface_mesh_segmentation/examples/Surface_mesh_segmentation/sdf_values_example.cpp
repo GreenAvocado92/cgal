@@ -11,11 +11,11 @@ typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
 typedef CGAL::Polyhedron_3<Kernel> Polyhedron;
 typedef boost::graph_traits<Polyhedron>::face_descriptor face_descriptor;
 
-int main()
+int main(int argc, char** argv)
 {
   // create and read Polyhedron
   Polyhedron mesh;
-  std::ifstream input(CGAL::data_file_path("meshes/cactus.off"));
+  std::ifstream input(argv[1]); // (CGAL::data_file_path("meshes/cactus.off"));
   if ( !input || !(input >> mesh) || mesh.empty() || ( !CGAL::is_triangle_mesh(mesh)) )
   {
     std::cerr << "Input is not a triangle mesh" << std::endl;
