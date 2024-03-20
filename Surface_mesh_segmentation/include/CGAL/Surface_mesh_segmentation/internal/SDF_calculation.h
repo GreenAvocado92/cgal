@@ -202,8 +202,8 @@ public:
     for( ; facet_begin != facet_end; ++facet_begin) {
       std::optional<double> sdf_value = calculate_sdf_value_of_facet(*facet_begin,
                                           cone_angle, true, disk_samples);
-
       if(sdf_value) {
+        std::cout << "sdf_value = " << *sdf_value << std::endl;
         put(sdf_values, *facet_begin, *sdf_value);
       } else          {
         put(sdf_values, *facet_begin, -1.0);

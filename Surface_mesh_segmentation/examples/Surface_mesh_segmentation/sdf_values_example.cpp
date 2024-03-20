@@ -43,9 +43,10 @@ int main(int argc, char** argv)
             << " maximum SDF: " << min_max_sdf.second << std::endl;
 
   // print SDF values
-  for(face_descriptor f : faces(mesh))
-      std::cout << sdf_property_map[f] << " ";
-
+  for(face_descriptor f : faces(mesh)) {
+      // std::cout << "f = " << f << std::endl;
+      std::cout << sdf_property_map[f] << " " << std::endl;
+  }
   std::cout << std::endl;
   return EXIT_SUCCESS;
 }

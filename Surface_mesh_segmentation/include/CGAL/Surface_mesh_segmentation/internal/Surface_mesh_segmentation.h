@@ -18,7 +18,8 @@
 
 #include <CGAL/Surface_mesh_segmentation/internal/Expectation_maximization.h>
 #include <CGAL/Surface_mesh_segmentation/internal/Filters.h>
-#include <CGAL/Surface_mesh_segmentation/internal/SDF_calculation.h>
+// #include <CGAL/Surface_mesh_segmentation/internal/SDF_calculation.h>
+#include "./SDF_calculation.h"
 
 #include <CGAL/boost/graph/alpha_expansion_graphcut.h>
 #ifndef CGAL_DO_NOT_USE_BOYKOV_KOLMOGOROV_MAXFLOW_SOFTWARE
