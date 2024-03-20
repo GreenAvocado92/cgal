@@ -17,9 +17,6 @@ typedef boost::graph_traits<Polyhedron>::face_descriptor face_descriptor;
  * 2：顶点以 外法向量方向交点为p,内法向量方向交点为q
  * 3: SDF=pq - 2r
  * **/
-void improve_algo(const Polyhedron& mesh) {
-
-}
 
 int main(int argc, char** argv)
 {

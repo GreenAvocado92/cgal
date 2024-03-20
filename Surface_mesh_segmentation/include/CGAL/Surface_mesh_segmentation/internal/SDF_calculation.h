@@ -123,6 +123,8 @@ private:
 
   double max_diagonal;
   bool   use_diagonal;
+
+  std::vector<Point> vertices_;
 public:
   /**
    * Construct AABB tree with a mesh. Ignores degenerated faces.
@@ -203,7 +205,7 @@ public:
       std::optional<double> sdf_value = calculate_sdf_value_of_facet(*facet_begin,
                                           cone_angle, true, disk_samples);
       if(sdf_value) {
-        std::cout << "sdf_value = " << *sdf_value << std::endl;
+        // std::cout << "sdf_value = " << *sdf_value << std::endl;
         put(sdf_values, *facet_begin, *sdf_value);
       } else          {
         put(sdf_values, *facet_begin, -1.0);
@@ -211,6 +213,7 @@ public:
     }
   }
 
+  
   /**
    * Overload for default sampling parameter
    */
@@ -265,6 +268,46 @@ public:
     return calculate_sdf_value_of_point(center, normal, skip, visitor, cone_angle,
                                         accept_if_acute, disk_samples);
   }
+
+  // improve algothrim
+  /**
+   * 改进算法，自定义顶点特征
+ * 1：所有顶点为圆心形成半径为r的球体，形成外部包络体
+ * 2：顶点以 外法向量方向交点为p,内法向量方向交点为q
+ * 3: SDF= pq - 2r
+ * **/
+   
+  template<class SkipPrimitiveFunctor, class FirstIntersectionVisitor>
+  std::optional<double> calculate_vdf_value_of_point(
+    const Point& center,
+    const Vector& normal,
+    const float& radius,
+    SkipPrimitiveFunctor skip,
+    FirstIntersectionVisitor visitor,
+    double cone_angle,
+    bool accept_if_acute,
+    const Disk_samples_list& disk_samples) const {
+      // 1: 搜索 center 的r邻域空间，获取点集
+      std::vector<Point> around_radius(0);
+      for (const auto& t : vertices_) {
+        double distance = 
+      }
+      // 2: 计算前序点集的包络体
+
+      // 3: 计算 normal 与包络体的交点p和as
+      // 4：pq - 2r
+      return 1.0;
+
+    }
+
+
+
+
+
+
+
+
+
 
   /**
    * Overload for directly taking sampled points from disk as parameter
