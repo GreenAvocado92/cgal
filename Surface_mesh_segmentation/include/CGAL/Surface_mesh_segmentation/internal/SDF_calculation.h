@@ -81,7 +81,8 @@ private:
   typedef typename GeomTraits::Segment_3  Segment;
   typedef typename GeomTraits::FT         FT;
   typedef typename GeomTraits::Line_3     Line;
-
+  typedef typename GeomTraits::Triangle_3 Triangle;
+ 
   typedef typename boost::graph_traits<Polyhedron>::face_iterator face_iterator;
   typedef typename boost::graph_traits<Polyhedron>::face_descriptor   face_handle;
   typedef typename boost::graph_traits<Polyhedron>::halfedge_descriptor   halfedge_handle;
@@ -181,6 +182,12 @@ public:
                                     bbox.ymax(), bbox.zmax() )
         );
     }
+
+    for (auto it = mesh.points_begin(); it != mesh.points_end(); it++) {
+      // std::cout << "it = " << *it << std::endl;
+      vertices_.emplace_back(*it);
+    }
+    std::cout << "vertices_ size = " << vertices_.size() << std::endl;
   }
 
   /**
@@ -247,6 +254,7 @@ public:
     double cone_angle,
     std::size_t number_of_rays,
     bool accept_if_acute) const {
+
     return calculate_sdf_value_of_point(center, normal, skip, visitor, cone_angle,
                                         number_of_rays, accept_if_acute,
                                         Default_sampler() );
@@ -267,7 +275,6 @@ public:
     DiskSampling disk_sampler) const {
     Disk_samples_list disk_samples;
     disk_sampler(number_of_rays, std::back_inserter(disk_samples));
-
     return calculate_sdf_value_of_point(center, normal, skip, visitor, cone_angle,
                                         accept_if_acute, disk_samples);
   }
@@ -299,6 +306,8 @@ public:
           around_radius.emplace_back(t);
         }
       }
+      std::cout << "aroud radius size = " << around_radius.size() << std::endl;
+ 
       // 2: 计算前序点集的包络体
       Polyhedron poly_hull;
       CGAL::convex_hull_3(around_radius.begin(), around_radius.end(), poly_hull);
@@ -307,21 +316,24 @@ public:
       std::vector<Point> pq(0);
       Line line(center, normal);
       face_iterator it, end;
-      for(it = faces(poly_hull).begin(), end = faces(poly_hull).end(); it!=end; it++)
-      {
-          const Point p1 = get(vertex_point_map,target(halfedge(it,poly_hull),poly_hull));
-          const Point p2 = get(vertex_point_map,target(next(halfedge(it,poly_hull),poly_hull),poly_hull));
-          const Point p3 = get(vertex_point_map,target(prev(halfedge(it,poly_hull),poly_hull),poly_hull));
-          Plane plane(p1, p2, p3);
-          // CGAL::cpp11::result_of<CGAL::Exact_predicates_inexact_constructions_kernel::Intersect_3>(Line, Plane)>::type result = CGAL::intersection(line, plane);
-          // if (result) {
-            // const Point *p = boost::get<Point>(&*result);
-            // pq.push_back(p);
-          // }
-      }
+      
+      // for(it = faces(poly_hull).begin(), end = faces(poly_hull).end(); it!=end; it++)
+      // {
+      //     const Point p1 = get(vertex_point_map,target(halfedge(it,poly_hull),poly_hull));
+      //     const Point p2 = get(vertex_point_map,target(next(halfedge(it,poly_hull),poly_hull),poly_hull));
+      //     const Point p3 = get(vertex_point_map,target(prev(halfedge(it,poly_hull),poly_hull),poly_hull));
+      //     Triangle triangle(p1, p2, p3);
+      //     auto result = CGAL::intersection(line, triangle);
+      //     if (result) {
+      //         Point* inter_point = boost::get<Point_3>(&*result);
+      //         // std::cout << "Intersection point: " << *intersection_point << std::endl;
+      //         pq.push_back(*inter_point);
+      //     }
+      // }
+      // std::cout << "pq size = " << pq.size() << std::endl;
 
       // 4：pq - 2r
-      return CGAL::squared_distance(pq[0], pq[1]) - 2 * radius;
+      return 1.0; // CGAL::squared_distance(pq[0], pq[1]) - 2 * radius;
     }
 
   /**
@@ -447,8 +459,12 @@ private:
     CGAL::internal::FirstIntersectionVisitor<face_handle>
     visitor;
 
-    return calculate_sdf_value_of_point(center, normal, skip, visitor, cone_angle,
+    // 修改函数，调用vdf计算
+    // return calculate_sdf_value_of_point(center, normal, skip, visitor, cone_angle,
+                                        // accept_if_acute, disk_samples);
+    return calculate_vdf_value_of_point(center, normal, 0.01, skip, visitor, cone_angle,
                                         accept_if_acute, disk_samples);
+
   }
 
   /**
