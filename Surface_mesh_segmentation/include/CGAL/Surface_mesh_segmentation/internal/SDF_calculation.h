@@ -27,6 +27,8 @@
 
 #include <boost/tuple/tuple.hpp>
 #include <optional>
+#include <CGAL/convex_hull_3.h>
+#include <CGAL/intersections.h>
 
 #define CGAL_NUMBER_OF_MAD 1.5
 
@@ -78,6 +80,7 @@ private:
   typedef typename GeomTraits::Plane_3    Plane;
   typedef typename GeomTraits::Segment_3  Segment;
   typedef typename GeomTraits::FT         FT;
+  typedef typename GeomTraits::Line_3     Line;
 
   typedef typename boost::graph_traits<Polyhedron>::face_iterator face_iterator;
   typedef typename boost::graph_traits<Polyhedron>::face_descriptor   face_handle;
@@ -276,7 +279,8 @@ public:
  * 2：顶点以 外法向量方向交点为p,内法向量方向交点为q
  * 3: SDF= pq - 2r
  * **/
-   
+
+  
   template<class SkipPrimitiveFunctor, class FirstIntersectionVisitor>
   std::optional<double> calculate_vdf_value_of_point(
     const Point& center,
@@ -290,24 +294,35 @@ public:
       // 1: 搜索 center 的r邻域空间，获取点集
       std::vector<Point> around_radius(0);
       for (const auto& t : vertices_) {
-        double distance = 
+        double distance = CGAL::squared_distance(center, t);
+        if (distance < radius) {
+          around_radius.emplace_back(t);
+        }
       }
       // 2: 计算前序点集的包络体
+      Polyhedron poly_hull;
+      CGAL::convex_hull_3(around_radius.begin(), around_radius.end(), poly_hull);
 
-      // 3: 计算 normal 与包络体的交点p和as
+      // 3: 计算 normal 与包络体的交点p和q
+      std::vector<Point> pq(0);
+      Line line(center, normal);
+      face_iterator it, end;
+      for(it = faces(poly_hull).begin(), end = faces(poly_hull).end(); it!=end; it++)
+      {
+          const Point p1 = get(vertex_point_map,target(halfedge(it,poly_hull),poly_hull));
+          const Point p2 = get(vertex_point_map,target(next(halfedge(it,poly_hull),poly_hull),poly_hull));
+          const Point p3 = get(vertex_point_map,target(prev(halfedge(it,poly_hull),poly_hull),poly_hull));
+          Plane plane(p1, p2, p3);
+          // CGAL::cpp11::result_of<CGAL::Exact_predicates_inexact_constructions_kernel::Intersect_3>(Line, Plane)>::type result = CGAL::intersection(line, plane);
+          // if (result) {
+            // const Point *p = boost::get<Point>(&*result);
+            // pq.push_back(p);
+          // }
+      }
+
       // 4：pq - 2r
-      return 1.0;
-
+      return CGAL::squared_distance(pq[0], pq[1]) - 2 * radius;
     }
-
-
-
-
-
-
-
-
-
 
   /**
    * Overload for directly taking sampled points from disk as parameter
